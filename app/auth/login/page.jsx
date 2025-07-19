@@ -23,10 +23,12 @@ const LoginPage = () => {
 
     if (error) {
       toast.error(error.message);
+      setError(error.message);
       setSuccess(false);
     } else {
       setError(null);
-      toast.success(true);
+      toast.success("Login successful!");
+      setSuccess(true);
 
       setTimeout(() => {
         router.push("/");
