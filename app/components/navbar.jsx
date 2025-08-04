@@ -1,47 +1,177 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Home, TrendingUp, PlusCircle } from "lucide-react"; // using lucide icons
+import { usePathname, useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { toggleTheme } from "@/app/redux/slices/themeSlice";
+import { LogOut, Home, List, User, Menu, X, Sun, Moon } from "lucide-react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/app/lib/supabaseClients";
+import toast from "react-hot-toast";
 
-const navLinks = [
-  { name: "Dashboard", href: "/", icon: <Home size={20} /> },
-  { name: "Transaction", href: "/transactions", icon: <PlusCircle size={20} /> },
-  { name: "Reports", href: "/reports", icon: <TrendingUp size={20} /> },
+const links = [
+  { href: "/dashboard", label: "Dashboard", icon: <Home size={20} /> },
+  { href: "/transactions", label: "Transactions", icon: <List size={20} /> },
+  { href: "/about", label: "About Me", icon: <User size={20} /> },
 ];
 
-const Sidebar = () => {
+export default function Sidebar() {
   const pathname = usePathname();
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const theme = useSelector((state) => state.theme.value);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Handle body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.classList.add("menu-open");
+    } else {
+      document.body.classList.remove("menu-open");
+    }
+
+    return () => {
+      document.body.classList.remove("menu-open");
+    };
+  }, [isMobileMenuOpen]);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        toast.error("Error logging out");
+        console.error("Logout error:", error);
+      } else {
+        toast.success("Logged out successfully");
+        router.push("/auth/login");
+      }
+    } catch (error) {
+      toast.error("Error logging out");
+      console.error("Logout error:", error);
+    }
+  };
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleLinkClick = () => {
+    closeMobileMenu();
+  };
 
   return (
-    <motion.aside
-      initial={{ x: -250, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      transition={{ type: "spring", stiffness: 100, damping: 20 }}
-      className="w-64 h-screen bg-gray-900 text-white p-6 fixed"
-    >
-      <h1 className="text-2xl font-bold mb-10">Trackify</h1>
+    <>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={toggleMobileMenu}
+        className="md:hidden fixed top-4 left-4 z-[60] p-3 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md rounded-xl shadow-professional transition-smooth hover:scale-105 mobile-optimized safe-area"
+        aria-label="Toggle mobile menu"
+      >
+        {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
 
-      <nav className="space-y-4">
-        {navLinks.map(({ name, href, icon }) => {
-          const isActive = pathname === href;
-          return (
-            <Link
-              key={name}
-              href={href}
-              className={`flex items-center gap-3 p-2 rounded-md hover:bg-gray-700 transition-colors ${
-                isActive ? "bg-gray-800" : ""
-              }`}
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[50] transition-smooth"
+          onClick={closeMobileMenu}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={`fixed top-0 left-0 h-full w-72 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-professional-lg z-[55] transform transition-transform duration-300 ease-in-out border-r border-gray-200/50 dark:border-gray-700/50 ${
+          isMobileMenuOpen
+            ? "translate-x-0"
+            : "md:translate-x-0 -translate-x-full"
+        }`}
+      >
+        <div className="p-6 h-full flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-professional">
+                <span className="text-white font-bold text-lg">T</span>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  Trackify
+                </h1>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Finance Tracker
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => dispatch(toggleTheme())}
+              className="p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-smooth mobile-optimized group"
+              aria-label="Toggle theme"
             >
-              {icon}
-              <span>{name}</span>
-            </Link>
-          );
-        })}
-      </nav>
-    </motion.aside>
-  );
-};
+              {theme === "light" ? (
+                <Moon
+                  size={18}
+                  className="text-gray-600 dark:text-gray-300 group-hover:text-gray-800 dark:group-hover:text-white transition-smooth"
+                />
+              ) : (
+                <Sun
+                  size={18}
+                  className="text-gray-600 dark:text-gray-300 group-hover:text-gray-800 dark:group-hover:text-white transition-smooth"
+                />
+              )}
+            </button>
+          </div>
 
-export default Sidebar;
+          {/* Navigation */}
+          <nav className="flex-1 space-y-2">
+            {links.map(({ href, label, icon }) => (
+              <Link
+                key={href}
+                href={href}
+                onClick={handleLinkClick}
+                className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-smooth mobile-optimized group ${
+                  pathname === href
+                    ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-professional"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                }`}
+              >
+                <div
+                  className={`transition-smooth ${
+                    pathname === href
+                      ? "text-white"
+                      : "text-gray-500 dark:text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400"
+                  }`}
+                >
+                  {icon}
+                </div>
+                <span className="font-medium">{label}</span>
+              </Link>
+            ))}
+          </nav>
+
+          {/* Logout Button */}
+          <div className="mt-auto pt-6">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-4 px-4 py-3 w-full rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-smooth text-red-600 dark:text-red-400 mobile-optimized group"
+            >
+              <LogOut
+                size={20}
+                className="group-hover:scale-110 transition-smooth"
+              />
+              <span className="font-medium">Logout</span>
+            </button>
+          </div>
+        </div>
+      </aside>
+    </>
+  );
+}
