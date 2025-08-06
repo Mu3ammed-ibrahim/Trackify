@@ -175,12 +175,12 @@ export default function TransactionsPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-xl shadow-sm"
+        className="bg-gradient-to-r from-indigo-500 to-purple-600 dark:bg-gray-800 p-6 md:p-8 rounded-xl shadow-sm mt-2"
       >
-        <h1 className="text-2xl md:text-3xl font-bold mb-2 text-gray-900 dark:text-white">
+        <h1 className="text-2xl md:text-3xl font-bold mb-2 text-white dark:text-white">
           Manage Transactions
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-white dark:text-gray-400">
           Add and track your income and expenses
         </p>
       </motion.div>
