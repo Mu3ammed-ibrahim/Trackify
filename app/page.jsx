@@ -1,53 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/app/lib/supabaseClients";
+import { useAuth } from "@/app/components/AuthProvider";
 import Dashboard from "@/app/dashboard/page";
 import { Loader2 } from "lucide-react";
 
 export default function HomePage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [session, setSession] = useState(null);
+  const { user, loading, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const {
-          data: { session: currentSession },
-        } = await supabase.auth.getSession();
-
-        if (!currentSession) {
-          router.push("/auth/login");
-          return;
-        }
-
-        setSession(currentSession);
-      } catch (error) {
-        console.error("Auth check error:", error);
-        router.push("/auth/login");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkAuth();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (event === "SIGNED_OUT") {
-          router.push("/auth/login");
-        } else if (session) {
-          setSession(session);
-        }
-      }
-    );
-
-    return () => {
-      authListener?.subscription.unsubscribe();
-    };
-  }, [router]);
+    if (!loading && !isAuthenticated) {
+      router.push("/auth/login");
+    }
+  }, [loading, isAuthenticated, router]);
 
   if (loading) {
     return (
@@ -60,5 +27,9 @@ export default function HomePage() {
     );
   }
 
-  return session ? <Dashboard /> : null;
+  if (!isAuthenticated) {
+    return null; // Will redirect to login
+  }
+
+  return <Dashboard />;
 }
