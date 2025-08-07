@@ -16,14 +16,21 @@ export const useAuth = () => {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
     // Get initial session
     const getInitialSession = async () => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      
+
       setUser(session?.user || null);
       setLoading(false);
     };
@@ -39,7 +46,7 @@ export function AuthProvider({ children }) {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [mounted]);
 
   const value = {
     user,

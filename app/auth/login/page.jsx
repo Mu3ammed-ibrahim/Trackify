@@ -3,10 +3,18 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/app/lib/supabaseClients";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2, Mail, Lock, AlertCircle } from "lucide-react";
+
+// Dynamically import motion components with no SSR
+const MotionDiv = dynamic(
+  () => import("framer-motion").then((mod) => mod.motion.div),
+  {
+    ssr: false,
+  }
+);
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -16,9 +24,19 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [emailNotConfirmed, setEmailNotConfirmed] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
+  // Use useEffect for client-side only code
   useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  // Handle auth state changes
+  useEffect(() => {
+    if (!mounted) return;
+
     const checkLoggedIn = async () => {
       try {
         const {
@@ -34,7 +52,7 @@ const LoginPage = () => {
     };
 
     checkLoggedIn();
-  }, [router]);
+  }, [router, mounted]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -106,9 +124,25 @@ const LoginPage = () => {
     }
   };
 
+  // Show loading state until component is mounted and initial auth check is complete
+  if (!mounted || loading) {
+    return (
+      <div className="relative flex items-center justify-center min-h-screen px-4 py-8 overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <div className="relative z-10 w-full max-w-md p-6 shadow-2xl bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl md:p-8">
+          <div className="flex flex-col items-center justify-center py-12 space-y-4">
+            <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Loading...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <motion.div
-      className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 px-4 py-8"
+    <MotionDiv
+      className="relative flex items-center justify-center min-h-screen px-4 py-8 overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
@@ -118,33 +152,33 @@ const LoginPage = () => {
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-blue-300 dark:bg-blue-700 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-[128px] animate-blob animation-delay-4000"></div>
 
       {/* Your existing content */}
-      <motion.div
-        className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm shadow-2xl rounded-2xl p-6 md:p-8 w-full max-w-md relative z-10"
+      <MotionDiv
+        className="relative z-10 w-full max-w-md p-6 shadow-2xl bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl md:p-8"
         initial={{ y: 50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="text-center mb-6 md:mb-8">
-          <div className="text-3xl md:text-4xl mb-4">👋</div>
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <div className="mb-6 text-center md:mb-8">
+          <div className="mb-4 text-3xl md:text-4xl">👋</div>
+          <h2 className="mb-2 text-2xl font-bold text-gray-900 md:text-3xl dark:text-white">
             Welcome Back
           </h2>
-          <p className="text-sm md:text-base text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-gray-600 md:text-base dark:text-gray-400">
             Sign in to your Trackify account
           </p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4 md:space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
               Email Address
             </label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Mail className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
               <input
                 type="email"
                 placeholder="you@example.com"
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm md:text-base"
+                className="w-full py-3 pl-10 pr-4 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white md:text-base"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -154,15 +188,15 @@ const LoginPage = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
               Password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Lock className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
-                className="w-full pl-10 pr-12 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm md:text-base"
+                className="w-full py-3 pl-10 pr-12 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent dark:bg-gray-700 dark:text-white md:text-base"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -171,7 +205,7 @@ const LoginPage = () => {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute text-gray-400 transform -translate-y-1/2 right-3 top-1/2 hover:text-gray-600"
                 disabled={loading}
               >
                 {showPassword ? (
@@ -214,7 +248,7 @@ const LoginPage = () => {
                   <button
                     type="button"
                     onClick={handleResendConfirmation}
-                    className="text-sm text-yellow-700 dark:text-yellow-300 hover:text-yellow-800 dark:hover:text-yellow-200 font-medium mt-2"
+                    className="mt-2 text-sm font-medium text-yellow-700 dark:text-yellow-300 hover:text-yellow-800 dark:hover:text-yellow-200"
                   >
                     Resend confirmation email
                   </button>
@@ -227,9 +261,9 @@ const LoginPage = () => {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3"
+              className="p-3 border border-green-200 rounded-lg bg-green-50 dark:bg-green-900/20 dark:border-green-800"
             >
-              <p className="text-green-600 dark:text-green-400 text-sm flex items-center gap-2">
+              <p className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
                 <span>✅</span>
                 Login successful! Redirecting...
               </p>
@@ -239,7 +273,7 @@ const LoginPage = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-medium py-3 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm md:text-base"
+            className="flex items-center justify-center w-full gap-2 py-3 text-sm font-medium text-white transition-colors bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:bg-indigo-400 md:text-base"
           >
             {loading ? (
               <>
@@ -256,15 +290,15 @@ const LoginPage = () => {
               Don't have an account?{" "}
               <Link
                 href="/auth/signup"
-                className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium transition-colors"
+                className="font-medium text-indigo-600 transition-colors dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300"
               >
                 Sign up
               </Link>
             </p>
           </div>
         </form>
-      </motion.div>
-    </motion.div>
+      </MotionDiv>
+    </MotionDiv>
   );
 };
 
