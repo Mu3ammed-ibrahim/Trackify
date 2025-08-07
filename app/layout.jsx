@@ -2,10 +2,7 @@ import "./globals.css";
 import { Suspense } from "react";
 import { Inter } from "next/font/google";
 import dynamic from "next/dynamic";
-const NavigationEvents = dynamic(
-  () => import("@/app/components/NavigationEvents"),
-  { ssr: false }
-);
+import NavigationEventsWrapper from "@/app/components/NavigationEventsWrapper";
 
 const RootLayoutWrapper = dynamic(
   () => import("@/app/components/RootLayoutWrapper"),
@@ -26,7 +23,7 @@ export default function RootLayout({ children }) {
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} transition-smooth antialiased`}>
         <Suspense fallback={null}>
-          <NavigationEvents />
+          <NavigationEventsWrapper />
         </Suspense>
         <RootLayoutWrapper>{children}</RootLayoutWrapper>
       </body>
