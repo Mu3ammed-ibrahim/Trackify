@@ -1,4 +1,5 @@
 "use client";
+import { motion } from "framer-motion";
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/app/lib/supabaseClients";
@@ -8,11 +9,14 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2, Mail, Lock, AlertCircle } from "lucide-react";
 
-// Dynamically import motion components with no SSR
+// Dynamically import motion components with no SSR and loading fallback
 const MotionDiv = dynamic(
   () => import("framer-motion").then((mod) => mod.motion.div),
   {
     ssr: false,
+    loading: () => (
+      <div className="bg-gray-100 rounded-lg animate-pulse dark:bg-gray-800"></div>
+    ),
   }
 );
 
@@ -30,6 +34,11 @@ const LoginPage = () => {
   // Use useEffect for client-side only code
   useEffect(() => {
     setMounted(true);
+    // Preload Framer Motion
+    const preloadFramerMotion = async () => {
+      await import("framer-motion");
+    };
+    preloadFramerMotion();
     return () => setMounted(false);
   }, []);
 
