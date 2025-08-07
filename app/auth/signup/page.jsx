@@ -16,11 +16,14 @@ import {
   CheckCircle,
 } from "lucide-react";
 
-// Dynamically import motion components with no SSR
+// Dynamically import motion components with no SSR and loading fallback
 const MotionDiv = dynamic(
   () => import("framer-motion").then((mod) => mod.motion.div),
   {
     ssr: false,
+    loading: () => (
+      <div className="animate-pulse bg-gray-100 dark:bg-gray-800 rounded-lg"></div>
+    ),
   }
 );
 
@@ -36,6 +39,12 @@ const SignupPage = () => {
   const router = useRouter();
 
   useEffect(() => {
+    // Preload Framer Motion
+    const preloadFramerMotion = async () => {
+      await import("framer-motion");
+    };
+    preloadFramerMotion();
+
     const checkLoggedIn = async () => {
       try {
         const {

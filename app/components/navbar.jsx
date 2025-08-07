@@ -10,7 +10,6 @@ import { supabase } from "@/app/lib/supabaseClients";
 import { useAuth } from "@/app/components/AuthProvider";
 import toast from "react-hot-toast";
 
-import NavLink from "./NavLink";
 
 const links = [
   { href: "/dashboard", label: "Dashboard", icon: <Home size={20} /> },
@@ -82,7 +81,7 @@ export default function Sidebar() {
       {/* Mobile Menu Button */}
       <button
         onClick={toggleMobileMenu}
-        className="md:hidden fixed top-4 left-4 z-50 p-3 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md rounded-responsive shadow-professional transition-smooth hover:scale-105 mobile-optimized safe-area"
+        className="fixed z-50 p-3 md:hidden top-4 left-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md rounded-responsive shadow-professional transition-smooth hover:scale-105 mobile-optimized safe-area"
         aria-label="Toggle mobile menu"
       >
         {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -91,7 +90,7 @@ export default function Sidebar() {
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-30 transition-smooth"
+          className="fixed inset-0 z-30 md:hidden bg-black/50 backdrop-blur-sm transition-smooth"
           onClick={closeMobileMenu}
         />
       )}
@@ -104,15 +103,15 @@ export default function Sidebar() {
             : "md:translate-x-0 -translate-x-full"
         }`}
       >
-        <div className="space-responsive h-full flex flex-col">
+        <div className="flex flex-col h-full space-responsive">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-responsive flex items-center justify-center shadow-professional">
-                <span className="text-white font-bold text-lg">T</span>
+              <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-responsive shadow-professional">
+                <span className="text-lg font-bold text-white">T</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                <h1 className="text-xl font-bold text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text">
                   Trackify
                 </h1>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -167,10 +166,10 @@ export default function Sidebar() {
           </nav>
 
           {/* Logout Button */}
-          <div className="mt-auto pt-6">
+          <div className="pt-6 mt-auto">
             <button
               onClick={handleLogout}
-              className="flex items-center gap-4 px-4 py-3 w-full rounded-responsive hover:bg-red-50 dark:hover:bg-red-900/20 transition-smooth text-red-600 dark:text-red-400 mobile-optimized group"
+              className="flex items-center w-full gap-4 px-4 py-3 text-red-600 rounded-responsive hover:bg-red-50 dark:hover:bg-red-900/20 transition-smooth dark:text-red-400 mobile-optimized group"
             >
               <LogOut
                 size={20}

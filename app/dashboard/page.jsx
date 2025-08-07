@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useMemo, useRef } from "react";
 import { supabase } from "@/app/lib/supabaseClients";
-import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 
 // Components
