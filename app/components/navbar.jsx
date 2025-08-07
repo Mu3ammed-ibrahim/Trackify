@@ -10,6 +10,8 @@ import { supabase } from "@/app/lib/supabaseClients";
 import { useAuth } from "@/app/components/AuthProvider";
 import toast from "react-hot-toast";
 
+import NavLink from "./NavLink";
+
 const links = [
   { href: "/dashboard", label: "Dashboard", icon: <Home size={20} /> },
   { href: "/transactions", label: "Transactions", icon: <List size={20} /> },

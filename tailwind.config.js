@@ -18,6 +18,9 @@ module.exports = {
         88: "22rem",
         128: "32rem",
       },
+      animation: {
+        progress: "progress 1s ease-in-out",
+      },
       colors: {
         // Futuristic color palette
         cyber: {

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/app/lib/supabaseClients";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import {
@@ -15,6 +15,14 @@ import {
   User,
   CheckCircle,
 } from "lucide-react";
+
+// Dynamically import motion components with no SSR
+const MotionDiv = dynamic(
+  () => import("framer-motion").then((mod) => mod.motion.div),
+  {
+    ssr: false,
+  }
+);
 
 const SignupPage = () => {
   const [email, setEmail] = useState("");
@@ -106,13 +114,18 @@ const SignupPage = () => {
   };
 
   return (
-    <motion.div
-      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 px-4 py-8"
+    <MotionDiv
+      className="relative flex items-center justify-center min-h-screen px-4 py-8 overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
-      <motion.div
-        className="bg-white dark:bg-gray-800 shadow-2xl rounded-2xl p-6 md:p-8 w-full max-w-md"
+      {/* Add the glowing orbs */}
+      <div className="absolute -top-40 -left-40 w-80 h-80 bg-purple-300 dark:bg-purple-700 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-[128px] animate-blob animation-delay-2000"></div>
+      <div className="absolute -bottom-40 -right-40 w-80 h-80 bg-indigo-300 dark:bg-indigo-700 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-[128px] animate-blob"></div>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-blue-300 dark:bg-blue-700 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-[128px] animate-blob animation-delay-4000"></div>
+
+      <MotionDiv
+        className="relative z-10 w-full max-w-md p-6 shadow-2xl bg-white/80 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl md:p-8"
         initial={{ y: 50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6 }}
@@ -278,8 +291,8 @@ const SignupPage = () => {
             </p>
           </div>
         </form>
-      </motion.div>
-    </motion.div>
+      </MotionDiv>
+    </MotionDiv>
   );
 };
 

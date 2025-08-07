@@ -11,41 +11,79 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     setMounted(true);
+  }, []);
 
-    // Check saved theme or system preference
-    const savedTheme = localStorage.getItem("theme");
-    let themeToSet = "light";
-
-    if (savedTheme === "dark" || savedTheme === "light") {
-      themeToSet = savedTheme;
-    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      themeToSet = "dark";
-    }
-
-    console.log("Initializing theme:", themeToSet);
-    // Dispatch the theme to Redux
-    dispatch(setTheme(themeToSet));
-  }, [dispatch]);
-
+  // Initialize theme only after component mounts
   useEffect(() => {
     if (!mounted) return;
 
-    console.log("Applying theme:", currentTheme);
-    // Apply theme class to document immediately
-    const root = document.documentElement;
-    if (currentTheme === "dark") {
-      root.classList.add("dark");
-      console.log("Added dark class to html element");
-    } else {
-      root.classList.remove("dark");
-      console.log("Removed dark class from html element");
-    }
+    // Add a small delay to ensure DOM is ready
+    const initTheme = () => {
+      try {
+        // Check saved theme or system preference
+        const savedTheme = localStorage.getItem("theme");
+        let themeToSet = "light";
 
-    // Save to localStorage
-    localStorage.setItem("theme", currentTheme);
+        if (savedTheme === "dark" || savedTheme === "light") {
+          themeToSet = savedTheme;
+        } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+          themeToSet = "dark";
+        }
+
+        console.log("Initializing theme:", themeToSet);
+        
+        // Apply theme class immediately to prevent flash
+        const root = document.documentElement;
+        if (themeToSet === "dark") {
+          root.classList.add("dark");
+        } else {
+          root.classList.remove("dark");
+        }
+
+        // Then dispatch to Redux
+        dispatch(setTheme(themeToSet));
+      } catch (error) {
+        console.error("Error initializing theme:", error);
+        // Fallback to light theme
+        dispatch(setTheme("light"));
+      }
+    };
+
+    // Use requestAnimationFrame to ensure DOM is ready
+    const rafId = requestAnimationFrame(initTheme);
+    
+    return () => cancelAnimationFrame(rafId);
+  }, [mounted, dispatch]);
+
+  // Apply theme changes after Redux state updates
+  useEffect(() => {
+    if (!mounted) return;
+
+    try {
+      console.log("Applying theme:", currentTheme);
+      
+      // Apply theme class to document
+      const root = document.documentElement;
+      if (currentTheme === "dark") {
+        root.classList.add("dark");
+        console.log("Added dark class to html element");
+      } else {
+        root.classList.remove("dark");
+        console.log("Removed dark class from html element");
+      }
+
+      // Save to localStorage
+      localStorage.setItem("theme", currentTheme);
+    } catch (error) {
+      console.error("Error applying theme:", error);
+    }
   }, [currentTheme, mounted]);
 
-  // Render children directly - theme styling is handled by the layout
+  // Don't render children until mounted to prevent hydration mismatch
+  if (!mounted) {
+    return <div style={{ visibility: "hidden" }}>{children}</div>;
+  }
+
   return <>{children}</>;
 }
 
